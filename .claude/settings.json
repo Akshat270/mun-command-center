@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Bash(npm test)",
+      "Bash(npm run lint)",
+      "Bash(curl -s http://127.0.0.1:*)",
+      "Bash(node scripts/check-publishable.mjs)"
+    ]
+  }
+}
