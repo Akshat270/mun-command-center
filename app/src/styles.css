@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+/* Command-center palette. Dark is the working default — a committee room is
+   dim and a bright screen is both hard to read and conspicuous. Light mode is
+   available for well-lit rooms. */
+
+@theme {
+  --color-ink-950: #08090c;
+  --color-ink-900: #0d0f14;
+  --color-ink-850: #12151c;
+  --color-ink-800: #171b24;
+  --color-ink-700: #1f2530;
+  --color-ink-600: #2b3341;
+  --color-ink-500: #3d4757;
+  --color-ink-400: #6b7789;
+  --color-ink-300: #93a0b4;
+  --color-ink-200: #c2cbd8;
+  --color-ink-100: #e6ebf2;
+
+  --color-accent: #d4402f;      /* Canadian red, desaturated for long sessions */
+  --color-accent-soft: #f0645320;
+  --color-signal: #3fa7d6;      /* informational */
+  --color-good: #3fb27f;
+  --color-warn: #e0a33e;
+  --color-bad: #d4544a;
+
+  --font-sans: 'Inter var', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: var(--color-ink-950);
+  --panel: var(--color-ink-900);
+  --panel-2: var(--color-ink-850);
+  --line: var(--color-ink-700);
+  --text: var(--color-ink-100);
+  --muted: var(--color-ink-300);
+  --faint: var(--color-ink-400);
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --panel-2: #eef1f5;
+  --line: #d6dbe3;
+  --text: #10141b;
+  --muted: #47536420;
+  --muted: #475364;
+  --faint: #6b7789;
+}
+
+* { border-color: var(--line); }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* the shell manages its own scroll regions */
+}
+
+/* Restrained motion. Nothing animates longer than 120ms — under pressure,
+   animation is latency. */
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in { animation: fade 110ms ease-out; }
+}
+@keyframes fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+
+@keyframes pulse-rec { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.rec-dot { animation: pulse-rec 1.4s ease-in-out infinite; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-ink-700); border-radius: 5px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-ink-600); }
+
+/* ---------------------------------------------------------------- atoms */
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.panel-2 { background: var(--panel-2); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: 5px; border: 1px solid var(--line);
+  background: var(--panel-2); color: var(--text);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  transition: background 100ms, border-color 100ms;
+  white-space: nowrap; user-select: none;
+}
+.btn:hover:not(:disabled) { background: var(--color-ink-700); border-color: var(--color-ink-500); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #e04b39; border-color: #e04b39; }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover:not(:disabled) { background: var(--panel-2); border-color: var(--line); }
+.btn-sm { padding: 3px 8px; font-size: 12px; }
+.btn-lg { padding: 11px 16px; font-size: 15px; }
+
+.input, .textarea, .select {
+  width: 100%; padding: 7px 10px; border-radius: 5px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--text);
+  font-size: 13px; font-family: inherit;
+}
+.input:focus, .textarea:focus, .select:focus {
+  outline: none; border-color: var(--color-signal);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-signal) 18%, transparent);
+}
+.textarea { resize: vertical; min-height: 68px; line-height: 1.55; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.03em; border: 1px solid var(--line); background: var(--panel-2);
+  color: var(--muted); white-space: nowrap;
+}
+
+/* Claim-type badges — the FACT / ARGUMENT / OPINION / AI distinction is
+   load-bearing during a live competition. */
+.badge-FACT     { background: #3fb27f22; border-color: #3fb27f55; color: #6cd3a4; }
+.badge-ARGUMENT { background: #3fa7d622; border-color: #3fa7d655; color: #7cc9ea; }
+.badge-OPINION  { background: #e0a33e22; border-color: #e0a33e55; color: #eec172; }
+.badge-AI       { background: #a06ee022; border-color: #a06ee055; color: #c3a1f0; }
+
+.prio-1 { background: #d4402f22; border-color: #d4402f55; color: #f08a7d; }
+.prio-2 { background: #3fa7d622; border-color: #3fa7d655; color: #7cc9ea; }
+.prio-3 { background: #6b778922; border-color: #6b778955; color: #a3aec0; }
+.prio-4 { background: #a06ee022; border-color: #a06ee055; color: #c3a1f0; }
+
+.kbd {
+  display: inline-block; min-width: 18px; padding: 1px 5px;
+  font-family: var(--font-mono); font-size: 11px; text-align: center;
+  border: 1px solid var(--line); border-bottom-width: 2px;
+  border-radius: 4px; background: var(--panel-2); color: var(--muted);
+}
+
+.scroll-y { overflow-y: auto; overscroll-behavior: contain; }
+
+.divide-line > * + * { border-top: 1px solid var(--line); }
+
+.link { color: var(--color-signal); cursor: pointer; text-decoration: none; }
+.link:hover { text-decoration: underline; }
+
+.mono { font-family: var(--font-mono); font-size: 12px; }
+
+.section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--faint);
+}
+
+mark { background: #e0a33e40; color: inherit; padding: 0 2px; border-radius: 2px; }
