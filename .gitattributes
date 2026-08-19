@@ -1,0 +1,37 @@
+# Normalise line endings.
+#
+# This was written on Windows, where files are CRLF on disk, but it will be
+# cloned on macOS and Linux too. Without this, the first edit from another
+# platform rewrites every line of a file and the diff becomes unreviewable —
+# which is exactly the kind of pull request that is impossible to merge safely.
+#
+# `text=auto` stores everything as LF in the repository and checks it out in the
+# platform's native form, so nobody has to change their editor.
+* text=auto
+
+# Shell scripts and the launcher must keep the endings their interpreters expect,
+# regardless of the platform they are checked out on. A .sh with CRLF fails with
+# a confusing "bad interpreter" error; MUN.cmd is parsed by cmd.exe, which wants
+# CRLF.
+*.sh    text eol=lf
+*.bash  text eol=lf
+*.cmd   text eol=crlf
+*.bat   text eol=crlf
+*.ps1   text eol=crlf
+
+# Binary — never touch, never diff as text.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.docx  binary
+*.zip   binary
+*.db    binary
+*.sqlite binary
+*.exe   binary
+
+# Generated. Collapsed in pull request diffs so a lockfile update does not bury
+# the change it accompanies; still versioned, still reviewable on request.
+package-lock.json linguist-generated=true -diff

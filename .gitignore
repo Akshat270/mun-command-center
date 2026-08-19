@@ -1,0 +1,57 @@
+# ---------------------------------------------------------------------------
+# Secrets and live data — never commit these.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# The database holds API keys, notes and the full transcript of a live session.
+MUN-Data/
+data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
+# Your own prepared content: speeches, the POI bank, per-country dossiers and the
+# attack/defence map. `seed-data.js` is a loader that picks this up when present
+# and falls back to `seed-data.example.js` otherwise, so the app works either way
+# and your strategy never reaches the repository.
+seed-data.local.js
+
+# Downloaded embedding model (23 MB) and any local recordings.
+cache/
+recordings/
+
+# ---------------------------------------------------------------------------
+# Competition material.
+#
+# These are the delegate's own prepared strategy: speeches, the POI bank, the
+# attack/defence map and per-country vulnerability notes. Publishing them before
+# a competition hands opponents the playbook — Austria, Argentina and Nepal are
+# held by classmates. UNGA_BG_FINAL.pdf is additionally the conference's own
+# material and not ours to redistribute at all.
+#
+# Remove these lines only if you have decided, deliberately and after the
+# competition, that you want the prep published.
+# ---------------------------------------------------------------------------
+*.docx
+*.doc
+*.pdf
+*.odt
+
+# ---------------------------------------------------------------------------
+# Build output and tooling
+# ---------------------------------------------------------------------------
+node_modules/
+dist/
+.vite/
+*.log
+*.tsbuildinfo
+
+# Portable Node.js dropped in for the pendrive build (~90 MB, machine-specific).
+node/
+
+.DS_Store
+Thumbs.db
+desktop.ini
