@@ -1,0 +1,77 @@
+name: Bug report
+description: Something does not work the way it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this.
+
+        **Please do not paste an API key, a transcript, or your prepared material into this issue.**
+        It is public. Redact anything private first — a description is almost always enough.
+
+        Found a security vulnerability? Report it privately instead — see
+        [SECURITY.md](../blob/main/SECURITY.md).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what happened instead?
+      placeholder: |
+        I pressed Next on the speakers list and expected the next delegation to take
+        the floor. The queue did not change and the timer kept running.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start a session
+        2. Add two speakers
+        3. Press Next
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      description: Transcription in particular behaves differently across browsers.
+      options:
+        - Chrome
+        - Edge
+        - Firefox
+        - Safari
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node version
+      description: Output of `node --version`. The app needs 22.5 or newer.
+      placeholder: v22.11.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Anything in the terminal or browser console
+      description: Optional. Redact any key or personal content before pasting.
+      render: text

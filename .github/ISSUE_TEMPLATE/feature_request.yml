@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest something the app should do
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The most useful feature requests describe a moment in a real committee where the
+        app let you down. That says more than a description of the feature itself.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What were you trying to do?
+      description: The situation, not the solution.
+      placeholder: |
+        The chair set a 45-second speaking time mid-session and I had no quick way to
+        change it without leaving the Live Room.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help?
+      validations:
+        required: true
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Does this fit how the app works?
+      description: |
+        Not a test — just worth thinking about, since these shape what can be accepted.
+        See CONTRIBUTING.md for the reasoning.
+      options:
+        - label: It works for any country and any committee, not just one
+        - label: It does not require an API key to be useful
+        - label: It does not require hosting the app on a shared server
+        - label: It does not send data anywhere new

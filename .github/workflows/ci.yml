@@ -1,0 +1,98 @@
+name: CI
+
+# Runs on pull requests from forks as well as branches. Deliberately uses
+# `pull_request` rather than `pull_request_target`: the former runs a
+# contributor's code with a read-only token and no access to repository secrets,
+# which is what makes it safe to accept pull requests from anyone.
+#
+# This workflow needs no secrets at all, and that is a property worth keeping —
+# the app runs and its tests pass with no API key, so an ordinary contributor
+# never needs a credential to get a green check.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # The app uses node:sqlite, so 22.5+ is the floor the engines field
+        # declares. 24.x catches anything that breaks on a newer runtime before a
+        # contributor hits it locally.
+        node: ['22.x', '24.x']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install
+        working-directory: app
+        run: npm ci
+
+      # First, because it is the check that cannot be allowed to fail silently:
+      # git history is permanent, and this is what keeps private material out of
+      # it. Runs before the build so a bad pull request fails fast.
+      - name: Nothing private is committed
+        run: node scripts/check-publishable.mjs
+
+      - name: Typecheck
+        working-directory: app
+        run: npx tsc --noEmit
+
+      # Most suites drive the real HTTP API rather than mocking it, so they need
+      # the server up. It starts with no API key and no documents — that it does
+      # so is itself part of what is being tested.
+      - name: Start server
+        working-directory: app
+        env:
+          MUN_DATA_DIR: ${{ runner.temp }}/mun-data
+        run: |
+          node --disable-warning=ExperimentalWarning server/index.js > "${{ runner.temp }}/server.log" 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf -m 2 http://127.0.0.1:8788/api/status > /dev/null; then
+              echo "server up after ${i}s"; exit 0
+            fi
+            sleep 1
+          done
+          echo "server did not start:"; cat "${{ runner.temp }}/server.log"; exit 1
+
+      - name: Test
+        working-directory: app
+        env:
+          MUN_DATA_DIR: ${{ runner.temp }}/mun-data
+        # workflow.test.js is excluded on purpose: it asserts against the
+        # maintainer's own imported source documents, which are private and
+        # deliberately not in this repository. Everything else runs here, and is
+        # what `npm test` gives a contributor with the dev server running.
+        run: |
+          node --disable-warning=ExperimentalWarning --test \
+            test/ai-models.test.js \
+            test/shortcuts.test.js \
+            test/transcription.test.js \
+            test/speakers.test.js \
+            test/resolution-import.test.js
+
+      - name: Server log on failure
+        if: failure()
+        run: cat "${{ runner.temp }}/server.log" || true
+
+      - name: Build
+        working-directory: app
+        run: npm run build
