@@ -46,14 +46,13 @@ export const IS_PROD = process.env.NODE_ENV === 'production'
 /**
  * Your committee assignment.
  *
- * Set these in `app/.env` (copy `.env.example`) and restart. They are read once
- * at startup.
+ * These are the defaults, read once at startup from `app/.env`.
  *
- * A stored `committee` row in the settings table takes precedence over all of
- * them — see committee.js. Nothing in the UI writes that row yet, but the API
- * accepts it (`PATCH /api/settings`) and every screen and AI prompt already
- * reads through it, so an in-app committee editor is a self-contained addition
- * that needs no server changes.
+ * Settings → Committee is the normal way to set this: it writes the `committee`
+ * settings row, which takes precedence over everything here (see committee.js),
+ * applies immediately, and survives re-seeding. The variables below are for
+ * configuring a clone up front — a pendrive build, or several committees
+ * prepared from one checkout.
  *
  * The defaults are deliberately generic. This app is not written for one country
  * or one agenda: nothing below is special-cased anywhere in the codebase, and
@@ -69,7 +68,7 @@ export const COMMITTEE = {
   countryCode: (process.env.MUN_COUNTRY_CODE || 'ZZ').toUpperCase(),
   flag: process.env.MUN_FLAG || '\u{1F3F3}',
   committee: process.env.MUN_COMMITTEE || 'UNGA',
-  agenda: process.env.MUN_AGENDA || 'Set MUN_AGENDA in app/.env',
+  agenda: process.env.MUN_AGENDA || 'Set your agenda in Settings → Committee',
   conference: process.env.MUN_CONFERENCE || 'Your Conference',
   dates: process.env.MUN_DATES || '',
   allies: (process.env.MUN_ALLIES || '')
