@@ -64,10 +64,12 @@ npm run dev         # Vite on :5180, API on :8788
 
 ### Making it yours
 
-1. **Set your committee** — copy `app/.env.example` to `app/.env` and fill in `MUN_COUNTRY`,
-   `MUN_COUNTRY_CODE`, `MUN_COMMITTEE`, `MUN_AGENDA`, `MUN_CONFERENCE` and optionally `MUN_ALLIES`.
-   Restart the server afterwards. *(There is no in-app editor for this yet — the API supports it, so
-   it is a good first contribution.)*
+1. **Set your committee** — Settings → Committee. Fill in your delegation, committee, agenda and
+   conference; everything else follows immediately, with no restart.
+
+   You can also set the `MUN_*` variables in `app/.env` instead (see `.env.example`), which is
+   useful for a pendrive build or preparing several committees from one clone. The in-app setting
+   wins where both are present.
 2. **Add your prepared content** — copy `app/server/db/seed-data.example.js` to `seed-data.local.js`
    in the same folder and edit it. The example file documents every field. Your version is gitignored
    and is picked up automatically.

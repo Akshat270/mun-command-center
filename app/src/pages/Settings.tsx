@@ -57,6 +57,8 @@ export function Settings() {
 
   return (
     <div className="p-4 flex flex-col gap-4 max-w-[820px]">
+      <CommitteePanel />
+
       {/* AI */}
       <Panel title="AI">
         <div className="divide-line text-[13px]">
@@ -546,6 +548,133 @@ function KeyPanel({ onChange }: { onChange: () => void }) {
         working once you have internet. Everything except AI works with no key at all.
       </p>
     </div>
+  )
+}
+
+/**
+ * Which delegation, committee and agenda you are representing.
+ *
+ * Everything downstream reads this: the top bar, the dashboard, the speakers
+ * list, and every AI prompt. It is stored as the `committee` settings row, which
+ * takes precedence over the MUN_* environment defaults and — unlike them —
+ * survives re-seeding and needs no restart.
+ *
+ * Saved explicitly rather than on every keystroke. These fields are edited as a
+ * set: writing a half-typed country name into the AI prompts of a session
+ * already in progress is not a small annoyance, it is the app telling the model
+ * you represent "Braz".
+ */
+function CommitteePanel() {
+  const { status, refreshStatus, toast } = useApp()
+  const committee = status?.committee
+  const [form, setForm] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+
+  // Re-seed the form whenever the stored committee changes, including the first
+  // load — `status` is null on the very first render.
+  useEffect(() => {
+    if (!committee) return
+    setForm({
+      country: committee.country ?? '',
+      countryCode: committee.countryCode ?? '',
+      flag: committee.flag ?? '',
+      committee: committee.committee ?? '',
+      agenda: committee.agenda ?? '',
+      conference: committee.conference ?? '',
+      dates: committee.dates ?? '',
+      allies: (committee.allies ?? []).join(', '),
+    })
+  }, [committee])
+
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  const dirty = committee ? (
+    form.country !== (committee.country ?? '') ||
+    form.countryCode !== (committee.countryCode ?? '') ||
+    form.flag !== (committee.flag ?? '') ||
+    form.committee !== (committee.committee ?? '') ||
+    form.agenda !== (committee.agenda ?? '') ||
+    form.conference !== (committee.conference ?? '') ||
+    form.dates !== (committee.dates ?? '') ||
+    form.allies !== ((committee.allies ?? []).join(', '))
+  ) : false
+
+  const save = async () => {
+    const country = form.country.trim()
+    if (!country) { toast('A delegation name is required.', 'warn'); return }
+    setSaving(true)
+    try {
+      await api.saveSettings({
+        committee: {
+          ...committee,
+          country,
+          // Uppercased and length-capped because it is matched against the
+          // ISO codes on speakers and documents; a lowercase or padded value
+          // silently stops "you are 4th in the list" from recognising you.
+          countryCode: form.countryCode.trim().toUpperCase().slice(0, 2),
+          flag: form.flag.trim(),
+          committee: form.committee.trim() || 'UNGA',
+          agenda: form.agenda.trim(),
+          conference: form.conference.trim(),
+          dates: form.dates.trim(),
+          allies: form.allies
+            .split(',')
+            .map((c) => c.trim().toUpperCase())
+            .filter(Boolean),
+        },
+      })
+      await refreshStatus()
+      toast('Committee saved — AI prompts follow it from the next request.', 'good')
+    } catch (e: any) {
+      toast(e.message || 'Could not save the committee.', 'bad')
+    } finally { setSaving(false) }
+  }
+
+  if (!committee) return null
+
+  const field = (key: string, label: string, placeholder: string, hint?: string) => (
+    <div>
+      <div className="section-title mb-1">{label}</div>
+      <input className="input" value={form[key] ?? ''} onChange={set(key)} placeholder={placeholder} />
+      {hint && <p className="text-[11px] mt-1" style={{ color: 'var(--faint)' }}>{hint}</p>}
+    </div>
+  )
+
+  return (
+    <Panel title="Committee">
+      <div className="p-3 flex flex-col gap-3">
+        <p className="text-[12px]" style={{ color: 'var(--muted)' }}>
+          Your assignment. The top bar, dashboard, speakers list and every AI prompt read these —
+          set them once and the whole app follows, whichever country and committee you have.
+        </p>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          {field('country', 'Delegation', 'Brazil')}
+          {field('countryCode', 'Country code', 'BR', 'ISO 3166 alpha-2. Used to match you in the speakers list.')}
+          {field('committee', 'Committee', 'UNGA', 'UNGA, ECOSOC, UNSC, HRC…')}
+          {field('conference', 'Conference', 'Springfield MUN 2026')}
+        </div>
+
+        {field('agenda', 'Agenda', 'The topic as the conference words it')}
+
+        <div className="grid sm:grid-cols-3 gap-3">
+          {field('flag', 'Flag', '🇧🇷', 'Optional, shown in the top bar.')}
+          {field('dates', 'Dates', '14–15 August 2026', 'Optional.')}
+          {field('allies', 'Coordinating with', 'AT, AR, NP',
+            'Optional. Country codes, comma separated — the AI treats them as partners and never speaks for them.')}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button className="btn btn-primary" onClick={save} disabled={!dirty || saving}>
+            {saving ? 'Saving…' : 'Save committee'}
+          </button>
+          {dirty && !saving && (
+            <span className="text-[11px]" style={{ color: 'var(--color-warn)' }}>Unsaved changes</span>
+          )}
+        </div>
+      </div>
+    </Panel>
   )
 }
 
